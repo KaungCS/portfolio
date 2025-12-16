@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+body {
+  background: #09090b; /* zinc-950 */
+  color: #f4f4f5; /* zinc-100 */
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+@keyframes slideDownLeft {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-150%, 150%) rotate(-5deg);
+    opacity: 0;
+  }
+}
+
+@keyframes slideUpRight {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translate(150%, -150%) rotate(5deg);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}

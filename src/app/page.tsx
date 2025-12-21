@@ -65,6 +65,9 @@ export default function Home() {
 
     setPrefersReducedMotion(reduced);
 
+    // Remove any pre-hydration overlay the inline script may have added
+    try { var pre = document.getElementById('intro-fallback'); if (pre) pre.remove(); } catch (e) {}
+
     if (reduced) {
       // Skip the cutscene entirely
       setPhase("complete");
@@ -291,14 +294,8 @@ export default function Home() {
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem("reducedMotion", value ? "1" : "0");
-        // Persist server-readable cookie so SSR can render correctly on reload.
-        if (value) {
-          document.cookie = 'reducedMotion=1; Path=/; Max-Age=31536000';
-        } else {
-          document.cookie = 'reducedMotion=0; Path=/; Max-Age=0';
-        }
       } catch (e) {
-        // ignore storage/cookie errors
+        // ignore storage errors
       }
     }
 
@@ -320,14 +317,12 @@ export default function Home() {
       if (blinkEndTimer.current) clearTimeout(blinkEndTimer.current);
       blinkTimer.current = null;
       blinkEndTimer.current = null;
-
-      // Reload so the server can read the cookie and render the page without the overlay
-      // (avoids any micro-flash on subsequent loads).
-      try { window.location.reload(); } catch (e) {}
     } else {
-      // When disabling reduced motion, also reload so the server can include the overlay
-      // when needed.
-      try { window.location.reload(); } catch (e) {}
+      // User disabled reduced motion — ensure we don't start the intro right away.
+      introTimers.current.forEach(clearTimeout);
+      introTimers.current = [];
+      setPhase("complete");
+      // Blinking will resume automatically because phase === 'complete' and prefersReducedMotion is false.
     }
   };
 

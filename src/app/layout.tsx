@@ -27,6 +27,33 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Inline pre-hydration script: creates an #intro-fallback overlay when intro should run.
+            It appends the overlay to document.body (no server-side attribute changes) so the
+            page isn't briefly visible before the intro starts. */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){
+          try {
+            var p = null;
+            try { p = localStorage.getItem('reducedMotion'); } catch(e){}
+            var reduced;
+            if (p !== null) {
+              reduced = p === '1';
+            } else {
+              reduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            }
+            if (!reduced && typeof document !== 'undefined' && document.body) {
+              var el = document.createElement('div');
+              el.id = 'intro-fallback';
+              el.setAttribute('aria-hidden','true');
+              el.style.position = 'fixed';
+              el.style.inset = '0';
+              el.style.zIndex = '99999';
+              el.style.background = '#ffffff';
+              el.style.pointerEvents = 'none';
+              document.body.appendChild(el);
+            }
+          } catch (e) { /* ignore */ }
+        })();` }} />
+
         {children}
       </body>
     </html>

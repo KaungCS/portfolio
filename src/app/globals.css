@@ -36,3 +36,14 @@ body {
     transform: translateY(-10px);
   }
 }
+
+/* Styles for dynamically-created pre-hydration overlay */
+#intro-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #ffffff;
+  pointer-events: none;
+}
+
+/* Styles for the dynamic pre-hydration overlay (created by layout script). */

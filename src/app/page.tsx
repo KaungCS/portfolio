@@ -25,15 +25,18 @@ type OutroPhase =
   | "done";
 
 export default function Home() {
-  const [phase, setPhase] = useState<AnimationPhase>("white");
+  // Deterministic initial state to prevent server/client hydration mismatch.
+  // We decide whether to run the intro inside a client-only effect below.
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
+  const [phase, setPhase] = useState<AnimationPhase>("complete");
   const [currentFrame, setCurrentFrame] = useState(1);
   const [isBlinking, setIsBlinking] = useState(false);
   const [outroPhase, setOutroPhase] = useState<OutroPhase>("idle");
   const [outroFrame, setOutroFrame] = useState(1);
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const [pendingLabel, setPendingLabel] = useState<string | null>(null);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const outroTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const introTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
   const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const blinkEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Speaking / dialogue state
@@ -48,68 +51,73 @@ export default function Home() {
   const hideDialogueTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Respect user preference for reduced motion
-    const mql = typeof window !== "undefined" && window.matchMedia
-      ? window.matchMedia("(prefers-reduced-motion: reduce)")
-      : null;
-    const reduced = !!mql && mql.matches;
+    // Respect persisted user preference for reduced motion (localStorage), then system preference
+    const persisted = typeof window !== "undefined" ? localStorage.getItem("reducedMotion") : null;
+    let reduced: boolean;
+    if (persisted !== null) {
+      reduced = persisted === "1";
+    } else {
+      const mql = typeof window !== "undefined" && window.matchMedia
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : null;
+      reduced = !!mql && mql.matches;
+    }
+
     setPrefersReducedMotion(reduced);
 
     if (reduced) {
-      // Skip the cutscene for users who prefer reduced motion
+      // Skip the cutscene entirely
       setPhase("complete");
       return;
     }
 
-    // Phase 1: White screen (0ms)
-    // Phase 2: Frame 1 appears (500ms delay for smooth transition)
-    const frame1Timer = setTimeout(() => {
+    // Start the intro from 'white' now that we're on the client
+    setPhase("white");
+
+    // Schedule intro timers and record them so they can be cancelled
+    const t1 = setTimeout(() => {
       setPhase("frame1");
       setCurrentFrame(1);
     }, 500);
+    introTimers.current.push(t1);
 
-    // Phase 3: Frame 2 appears (500ms + 300ms = 800ms)
-    const frame2Timer = setTimeout(() => {
+    const t2 = setTimeout(() => {
       setPhase("frame2");
       setCurrentFrame(2);
     }, 800);
+    introTimers.current.push(t2);
 
-    // Phase 4: Frame 3 appears (800ms + 300ms = 1100ms)
-    const frame3Timer = setTimeout(() => {
+    const t3 = setTimeout(() => {
       setPhase("frame3");
       setCurrentFrame(3);
     }, 1100);
+    introTimers.current.push(t3);
 
-    // Phase 5: Frame 4 appears (1300ms)
-    const frame4Timer = setTimeout(() => {
+    const t4 = setTimeout(() => {
       setPhase("frame4");
       setCurrentFrame(4);
     }, 1300);
+    introTimers.current.push(t4);
 
-    // Phase 6: Frame 5 appears (1400ms)
-    const frame5Timer = setTimeout(() => {
+    const t5 = setTimeout(() => {
       setPhase("frame5");
       setCurrentFrame(5);
     }, 1400);
+    introTimers.current.push(t5);
 
-    // Phase 7: Slicing animation starts (1800ms)
     const slicingTimer = setTimeout(() => {
       setPhase("slicing");
     }, 1800);
+    introTimers.current.push(slicingTimer);
 
-    // Phase 8: Complete (2300ms - ends animation earlier)
     const completeTimer = setTimeout(() => {
       setPhase("complete");
     }, 2300);
+    introTimers.current.push(completeTimer);
 
     return () => {
-      clearTimeout(frame1Timer);
-      clearTimeout(frame2Timer);
-      clearTimeout(frame3Timer);
-      clearTimeout(frame4Timer);
-      clearTimeout(frame5Timer);
-      clearTimeout(slicingTimer);
-      clearTimeout(completeTimer);
+      introTimers.current.forEach(clearTimeout);
+      introTimers.current = [];
     };
   }, []);
 
@@ -168,7 +176,7 @@ export default function Home() {
         const tmp = copy[i];
         copy[i] = copy[j];
         copy[j] = tmp;
-      }
+  }
       remainingDialogues.current = copy;
     }
 
@@ -207,6 +215,19 @@ export default function Home() {
   };
 
   const startOutro = (url: string, label: string) => {
+    // If user prefers reduced motion, open immediately and skip outro animation
+    if (prefersReducedMotion) {
+      try {
+        window.open(url, "_blank", "noopener,noreferrer");
+      } catch (e) {
+        /* ignore */
+      }
+      setOutroPhase("done");
+      setPendingUrl(null);
+      setPendingLabel(null);
+      return;
+    }
+
     // Prevent overlapping runs
     outroTimers.current.forEach(clearTimeout);
     outroTimers.current = [];
@@ -229,21 +250,21 @@ export default function Home() {
     };
 
     // Custom outro timing:
-    // frame1: 0ms (start), frame2: 800ms, frame3: 1000ms, frame4: 1100ms, frame5: 1200ms
+    // frame1: 0ms (start), frame2: 800ms, frame3: 1000ms, frame4: 1200ms, frame5: 1400ms
     schedule("frame1", 1, 0);
     schedule("frame2", 2, 800);
     schedule("frame3", 3, 1000);
-    schedule("frame4", 4, 1100);
-    schedule("frame5", 5, 1200);
+    schedule("frame4", 4, 1200);
+    schedule("frame5", 5, 1400);
 
-    // Open link after 1300ms to allow the send-off cutscene (may be blocked by popup blockers)
+    // Open link after 1400ms to allow the send-off cutscene (may be blocked by popup blockers)
     outroTimers.current.push(
       setTimeout(() => {
         window.open(url, "_blank", "noopener,noreferrer");
         setOutroPhase("done");
         setPendingUrl(null);
         setPendingLabel(null);
-      }, 1400),
+      }, 1600),
     );
   };
 
@@ -264,8 +285,75 @@ export default function Home() {
     startOutro(urls[type], labels[type]);
   };
 
+  // Persisted reduced-motion setter — only affects intro/outro/blink, not dialogue typing
+  const setReducedPreference = (value: boolean) => {
+    setPrefersReducedMotion(value);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("reducedMotion", value ? "1" : "0");
+        // Persist server-readable cookie so SSR can render correctly on reload.
+        if (value) {
+          document.cookie = 'reducedMotion=1; Path=/; Max-Age=31536000';
+        } else {
+          document.cookie = 'reducedMotion=0; Path=/; Max-Age=0';
+        }
+      } catch (e) {
+        // ignore storage/cookie errors
+      }
+    }
+
+    if (value) {
+      // Cancel intro timers and mark complete
+      introTimers.current.forEach(clearTimeout);
+      introTimers.current = [];
+      setPhase("complete");
+
+      // Cancel outro timers and pending open
+      outroTimers.current.forEach(clearTimeout);
+      outroTimers.current = [];
+      setOutroPhase("idle");
+      setPendingUrl(null);
+      setPendingLabel(null);
+
+      // Cancel blinking
+      if (blinkTimer.current) clearTimeout(blinkTimer.current);
+      if (blinkEndTimer.current) clearTimeout(blinkEndTimer.current);
+      blinkTimer.current = null;
+      blinkEndTimer.current = null;
+
+      // Reload so the server can read the cookie and render the page without the overlay
+      // (avoids any micro-flash on subsequent loads).
+      try { window.location.reload(); } catch (e) {}
+    } else {
+      // When disabling reduced motion, also reload so the server can include the overlay
+      // when needed.
+      try { window.location.reload(); } catch (e) {}
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-zinc-950 text-zinc-100 overflow-hidden">
+      {/* Reduced motion toggle (fixed top-right) */}
+      <div className="fixed top-4 right-4 z-60">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={prefersReducedMotion}
+          onClick={() => setReducedPreference(!prefersReducedMotion)}
+          className="inline-flex items-center gap-2 p-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-sm"
+        >
+          <span className="sr-only">Toggle reduced motion</span>
+          <div
+            aria-hidden
+            className={`w-12 h-6 flex items-center p-1 rounded-full transition-colors ${prefersReducedMotion ? "bg-emerald-500" : "bg-zinc-700"}`}
+          >
+            <div
+              className={`bg-white w-4 h-4 rounded-full shadow transform transition-transform ${prefersReducedMotion ? "translate-x-6" : "translate-x-0"}`}
+            />
+          </div>
+          <span className="hidden md:inline text-zinc-300 text-sm pr-2">Reduced Motion</span>
+        </button>
+      </div>
       {/* Cutscene Overlay */}
       {phase !== "complete" && (
         <div className="fixed inset-0 z-50 pointer-events-none" style={{ overflow: "hidden" }}>
@@ -595,7 +683,7 @@ export default function Home() {
                     <div
                       className="relative"
                       style={{
-                        animation: "float 3s ease-in-out infinite",
+                        animation: prefersReducedMotion ? "none" : "float 3s ease-in-out infinite",
                       }}
                     >
                       <div

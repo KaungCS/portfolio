@@ -2,9 +2,12 @@
 
 import { Github, Linkedin, Mail, Code2, Database, Globe } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 import Image from "next/image";
 import FloatingProfile from "../components/FloatingProfile";
 import OutroSequence from "../components/OutroSequence";
+import AcademicProgress from "../components/AcademicProgress";
+import TreeVisualizer from "../components/TreeVisualizer";
 import dialoguesList from "../data/dialogues";
 
 type AnimationPhase =
@@ -41,6 +44,26 @@ export default function Home() {
   const introTimers = useRef<number[]>([]);
   const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const blinkEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Tree visualizer overlay state (open + origin coordinates in percentages)
+  const [showTree, setShowTree] = useState<{ open: boolean; origin?: { x: string; y: string } }>({ open: false });
+
+  const openTreeFromEvent = (e?: MouseEvent) => {
+    // Default to center if coordinates are not available
+    let origin = { x: "50%", y: "50%" };
+
+    try {
+      if (e && typeof window !== "undefined") {
+        const x = Math.round((e.clientX / window.innerWidth) * 100);
+        const y = Math.round((e.clientY / window.innerHeight) * 100);
+        origin = { x: `${x}%`, y: `${y}%` };
+      }
+    } catch (err) {
+      // fallback to center
+    }
+
+    setShowTree({ open: true, origin });
+  };
   // Speaking / dialogue state
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [currentDialogue, setCurrentDialogue] = useState<string | null>(null);
@@ -566,6 +589,9 @@ export default function Home() {
       {/* Outro Cutscene (refactored component) */}
       <OutroSequence outroPhase={outroPhase} outroFrame={outroFrame} />
 
+      {/* Degree path visualizer overlay */}
+      <TreeVisualizer open={showTree.open} origin={showTree.origin} onClose={() => setShowTree({ open: false })} />
+
       {/* Screen reader announcement for outgoing links */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {pendingLabel && outroPhase !== "idle" ? `Opening ${pendingLabel} in a new tab.` : ""}
@@ -688,6 +714,7 @@ export default function Home() {
             </p>
           </div>
 
+
           <div className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8">
             <h3 className="mb-3 text-xl font-semibold md:text-2xl">
               Project Two
@@ -707,6 +734,9 @@ export default function Home() {
               architecture patterns for optimal performance.
             </p>
           </div>
+
+          {/* Academic Progress Bento */}
+          <AcademicProgress progress={90} onOpen={(e) => openTreeFromEvent(e)} />
 
           {/* On Repeat / Soundtrack Card */}
           <div

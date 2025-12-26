@@ -3,6 +3,8 @@
 import { Github, Linkedin, Mail, Code2, Database, Globe } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import FloatingProfile from "../components/FloatingProfile";
+import OutroSequence from "../components/OutroSequence";
 import dialoguesList from "../data/dialogues";
 
 type AnimationPhase =
@@ -25,6 +27,9 @@ type OutroPhase =
   | "done";
 
 export default function Home() {
+  // Feature flag: keep refactor changes behind a dev-only flag until tested
+  const DEV_REFAC_IN_PROGRESS = true; // set to `false` to use original inline logic
+
   // Deterministic initial state to prevent server/client hydration mismatch.
   // We decide whether to run the intro inside a client-only effect below.
   const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
@@ -36,7 +41,7 @@ export default function Home() {
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const [pendingLabel, setPendingLabel] = useState<string | null>(null);
   const outroTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
-  const introTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const introTimers = useRef<number[]>([]);
   const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const blinkEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Speaking / dialogue state
@@ -77,55 +82,113 @@ export default function Home() {
     // Start the intro from 'white' now that we're on the client
     setPhase("white");
 
-    // Schedule intro timers and record them so they can be cancelled
-    const t1 = setTimeout(() => {
-      setPhase("frame1");
-      setCurrentFrame(1);
+    // Schedule intro timers and record them so they can be cancelled.
+    // Use a conservative start: preload frames with a 500ms timeout fallback, then start after two RAFs.
+    const imageSrcs = ['/character-frame1.png','/character-frame2.png','/character-frame3.png','/character-frame4.png','/character-frame5.png'];
+    const images = [] as HTMLImageElement[];
+    let loadedCount = 0;
+    let preloadTimeout: ReturnType<typeof setTimeout> | null = null;
+    let rafA: number | null = null;
+    let rafB: number | null = null;
+    let startScheduled = false;
+
+    const startIntroTimers = () => {
+      if (startScheduled) return;
+      startScheduled = true;
+
+      const t1 = window.setTimeout(() => {
+        setPhase("frame1");
+        setCurrentFrame(1);
+      }, 500);
+      introTimers.current.push(t1);
+
+      const t2 = window.setTimeout(() => {
+        setPhase("frame2");
+        setCurrentFrame(2);
+      }, 800);
+      introTimers.current.push(t2);
+
+      const t3 = window.setTimeout(() => {
+        setPhase("frame3");
+        setCurrentFrame(3);
+      }, 1100);
+      introTimers.current.push(t3);
+
+      const t4 = window.setTimeout(() => {
+        setPhase("frame4");
+        setCurrentFrame(4);
+      }, 1300);
+      introTimers.current.push(t4);
+
+      const t5 = window.setTimeout(() => {
+        setPhase("frame5");
+        setCurrentFrame(5);
+      }, 1400);
+      introTimers.current.push(t5);
+
+      const slicingTimer = window.setTimeout(() => {
+        setPhase("slicing");
+      }, 1800);
+      introTimers.current.push(slicingTimer);
+
+      const completeTimer = window.setTimeout(() => {
+        setPhase("complete");
+      }, 2300);
+      introTimers.current.push(completeTimer);
+    };
+
+    const finishPreload = () => {
+      if (preloadTimeout) {
+        clearTimeout(preloadTimeout);
+        preloadTimeout = null;
+      }
+      // schedule start after two RAFs to avoid hydration races
+      rafA = requestAnimationFrame(() => {
+        rafB = requestAnimationFrame(() => {
+          startIntroTimers();
+        });
+      });
+    };
+
+    // start a timeout fallback in case images fail to load
+    preloadTimeout = setTimeout(() => {
+      finishPreload();
     }, 500);
-    introTimers.current.push(t1);
 
-    const t2 = setTimeout(() => {
-      setPhase("frame2");
-      setCurrentFrame(2);
-    }, 800);
-    introTimers.current.push(t2);
-
-    const t3 = setTimeout(() => {
-      setPhase("frame3");
-      setCurrentFrame(3);
-    }, 1100);
-    introTimers.current.push(t3);
-
-    const t4 = setTimeout(() => {
-      setPhase("frame4");
-      setCurrentFrame(4);
-    }, 1300);
-    introTimers.current.push(t4);
-
-    const t5 = setTimeout(() => {
-      setPhase("frame5");
-      setCurrentFrame(5);
-    }, 1400);
-    introTimers.current.push(t5);
-
-    const slicingTimer = setTimeout(() => {
-      setPhase("slicing");
-    }, 1800);
-    introTimers.current.push(slicingTimer);
-
-    const completeTimer = setTimeout(() => {
-      setPhase("complete");
-    }, 2300);
-    introTimers.current.push(completeTimer);
+    imageSrcs.forEach((src) => {
+      const img = document.createElement('img') as HTMLImageElement;
+      images.push(img);
+      img.onload = () => {
+        loadedCount += 1;
+        if (loadedCount === imageSrcs.length) finishPreload();
+      };
+      img.onerror = () => {
+        // ignore individual load errors
+      };
+      img.src = src;
+    });
 
     return () => {
+      // cleanup all intro timers and preload handlers
       introTimers.current.forEach(clearTimeout);
       introTimers.current = [];
+      if (preloadTimeout) clearTimeout(preloadTimeout);
+      if (rafA !== null) cancelAnimationFrame(rafA);
+      if (rafB !== null) cancelAnimationFrame(rafB);
+      try { images.forEach((img) => { img.onload = null; img.onerror = null; }); } catch (e) {}
     };
   }, []);
 
   // Blinking animation for profile picture
   useEffect(() => {
+    // Debug: when the intro completes, log the runtime flag for verification (dev-only)
+    if (DEV_REFAC_IN_PROGRESS && phase === "complete") {
+      try {
+        // eslint-disable-next-line no-console
+        console.log('[Home] phase complete, __introPlayed=', (typeof window !== 'undefined') ? (window as any).__introPlayed : undefined);
+      } catch (e) {}
+    }
+
     if (phase !== "complete") return;
     if (prefersReducedMotion) return;
 
@@ -305,6 +368,9 @@ export default function Home() {
       introTimers.current = [];
       setPhase("complete");
 
+      // Mark the intro as played for this session so toggling doesn't replay it
+      try { if (typeof window !== 'undefined') (window as any).__introPlayed = true; } catch (e) {}
+
       // Cancel outro timers and pending open
       outroTimers.current.forEach(clearTimeout);
       outroTimers.current = [];
@@ -351,7 +417,8 @@ export default function Home() {
       </div>
       {/* Cutscene Overlay */}
       {phase !== "complete" && (
-        <div className="fixed inset-0 z-50 pointer-events-none" style={{ overflow: "hidden" }}>
+
+          <div className="fixed inset-0 z-50 pointer-events-none" style={{ overflow: "hidden" }}>
           {/* White Canvas Background */}
           <div
             className="absolute inset-0 bg-white"
@@ -507,132 +574,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* Outro Cutscene Overlay */}
-      {outroPhase !== "idle" && outroPhase !== "done" && (
-        <div className="fixed inset-0 z-50 pointer-events-none" style={{ overflow: "hidden" }}>
-          {/* White Background for line-art visibility */}
-          <div className="absolute inset-0 bg-white" />
-
-          {/* Outro Frames - cycle through frame1, frame2, frame3, frame4, frame5 */}
-          {(outroPhase === "frame1" ||
-            outroPhase === "frame2" ||
-            outroPhase === "frame3" ||
-            outroPhase === "frame4" ||
-            outroPhase === "frame5") && (
-            <div
-              className="absolute inset-0 flex items-center justify-center"
-              style={{
-                opacity: 1,
-              }}
-            >
-              {/* Frame 1 */}
-              <div
-                style={{
-                  position: "absolute",
-                  opacity: outroFrame === 1 ? 1 : 0,
-                  transition: "opacity 0.2s ease-in-out",
-                  mixBlendMode: "multiply",
-                  filter: "contrast(1.05)",
-                }}
-              >
-                <Image
-                  src="/outro-frame1.png"
-                  alt="Outro Frame 1"
-                  width={800}
-                  height={800}
-                  className="object-contain"
-                  priority
-                  unoptimized
-                />
-              </div>
-
-              {/* Frame 2 */}
-              <div
-                style={{
-                  position: "absolute",
-                  opacity: outroFrame === 2 ? 1 : 0,
-                  transition: "opacity 0.2s ease-in-out",
-                  mixBlendMode: "multiply",
-                  filter: "contrast(1.05)",
-                }}
-              >
-                <Image
-                  src="/outro-frame2.png"
-                  alt="Outro Frame 2"
-                  width={800}
-                  height={800}
-                  className="object-contain"
-                  priority
-                  unoptimized
-                />
-              </div>
-
-              {/* Frame 3 */}
-              <div
-                style={{
-                  position: "absolute",
-                  opacity: outroFrame === 3 ? 1 : 0,
-                  transition: "opacity 0.2s ease-in-out",
-                  mixBlendMode: "multiply",
-                  filter: "contrast(1.05)",
-                }}
-              >
-                <Image
-                  src="/outro-frame3.png"
-                  alt="Outro Frame 3"
-                  width={800}
-                  height={800}
-                  className="object-contain"
-                  priority
-                  unoptimized
-                />
-              </div>
-
-              {/* Frame 4 */}
-              <div
-                style={{
-                  position: "absolute",
-                  opacity: outroFrame === 4 ? 1 : 0,
-                  transition: "opacity 0.2s ease-in-out",
-                  mixBlendMode: "multiply",
-                  filter: "contrast(1.05)",
-                }}
-              >
-                <Image
-                  src="/outro-frame4.png"
-                  alt="Outro Frame 4"
-                  width={800}
-                  height={800}
-                  className="object-contain"
-                  priority
-                  unoptimized
-                />
-              </div>
-
-              {/* Frame 5 */}
-              <div
-                style={{
-                  position: "absolute",
-                  opacity: outroFrame === 5 ? 1 : 0,
-                  transition: "opacity 0.2s ease-in-out",
-                  mixBlendMode: "multiply",
-                  filter: "contrast(1.05)",
-                }}
-              >
-                <Image
-                  src="/outro-frame5.png"
-                  alt="Outro Frame 5"
-                  width={800}
-                  height={800}
-                  className="object-contain"
-                  priority
-                  unoptimized
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Outro Cutscene (refactored component) */}
+      <OutroSequence outroPhase={outroPhase} outroFrame={outroFrame} />
 
       {/* Screen reader announcement for outgoing links */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
@@ -670,98 +613,15 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Profile Picture with Blinking Animation */}
+              {/* Profile Picture with Blinking Animation (refactored) */}
               {phase === "complete" && (
-                <div className="flex-shrink-0 flex items-center justify-center md:justify-end">
-                  {/* wrapper to nudge the floating avatar slightly left without affecting its float animation */}
-                  <div style={{ transform: "translateX(-12px)" }}>
-                    <div
-                      className="relative"
-                      style={{
-                        animation: prefersReducedMotion ? "none" : "float 3s ease-in-out infinite",
-                      }}
-                    >
-                      <div
-                        // make the avatar clickable; disable when speaking
-                        role={isSpeaking ? undefined : "button"}
-                        tabIndex={isSpeaking ? -1 : 0}
-                        onKeyDown={(e) => {
-                          if (isSpeaking) return;
-                          if (e.key === "Enter" || e.key === " ") startDialogue();
-                        }}
-                        onClick={() => {
-                          if (isSpeaking) return;
-                          startDialogue();
-                        }}
-                        style={{
-                          position: "relative",
-                          width: "230px",
-                          height: "230px",
-                          borderRadius: "9999px",
-                          background: "#ffffff",
-                          padding: "8px",
-                          boxSizing: "border-box",
-                          border: "2px solid rgba(0,0,0,0.08)",
-                          cursor: isSpeaking ? "default" : "pointer",
-                        }}
-                      >
-                        {/* Normal/Talking frames */}
-                        <Image
-                          src={isSpeaking ? "/profile-talking-normal.png?v=2" : "/profile-normal.png?v=2"}
-                          alt="Profile"
-                          width={214}
-                          height={214}
-                          className="object-contain rounded-full"
-                          unoptimized
-                          style={{
-                            position: "absolute",
-                            top: 8,
-                            left: 8,
-                            opacity: isBlinking ? 0 : 1,
-                            transition: "opacity 0.1s ease-in-out",
-                          }}
-                        />
-                        {/* Blinking frame (or talking-blink when speaking) */}
-                        <Image
-                          src={isSpeaking ? "/profile-talking-blink.png?v=2" : "/profile-blink.png?v=2"}
-                          alt="Profile Blink"
-                          width={214}
-                          height={214}
-                          className="object-contain rounded-full"
-                          unoptimized
-                          style={{
-                            position: "absolute",
-                            top: 8,
-                            left: 8,
-                            opacity: isBlinking ? 1 : 0,
-                            transition: "opacity 0.1s ease-in-out",
-                          }}
-                        />
-
-                        {/* Speech textbox (positioned above the avatar) */}
-                        {isSpeaking && (
-                          <div
-                            role="status"
-                            aria-live="polite"
-                            aria-atomic="true"
-                            style={{
-                              position: "absolute",
-                              bottom: "110%",
-                              left: "50%",
-                              transform: "translateX(-50%)",
-                              pointerEvents: "none",
-                              width: "min(320px, 70vw)",
-                            }}
-                          >
-                            <div className="bg-white text-black rounded-lg border border-zinc-200 px-3 py-2 shadow-md">
-                              <span className="text-sm leading-relaxed">{visibleDialogue}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <FloatingProfile
+                  visible={true}
+                  prefersReducedMotion={prefersReducedMotion}
+                  isSpeaking={isSpeaking}
+                  visibleDialogue={visibleDialogue}
+                  startDialogue={startDialogue}
+                />
               )}
             </div>
           </div>

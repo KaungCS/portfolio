@@ -27,9 +27,6 @@ type OutroPhase =
   | "done";
 
 export default function Home() {
-  // Feature flag: keep refactor changes behind a dev-only flag until tested
-  const DEV_REFAC_IN_PROGRESS = true; // set to `false` to use original inline logic
-
   // Deterministic initial state to prevent server/client hydration mismatch.
   // We decide whether to run the intro inside a client-only effect below.
   const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
@@ -181,14 +178,6 @@ export default function Home() {
 
   // Blinking animation for profile picture
   useEffect(() => {
-    // Debug: when the intro completes, log the runtime flag for verification (dev-only)
-    if (DEV_REFAC_IN_PROGRESS && phase === "complete") {
-      try {
-        // eslint-disable-next-line no-console
-        console.log('[Home] phase complete, __introPlayed=', (typeof window !== 'undefined') ? (window as any).__introPlayed : undefined);
-      } catch (e) {}
-    }
-
     if (phase !== "complete") return;
     if (prefersReducedMotion) return;
 

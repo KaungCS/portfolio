@@ -16,12 +16,14 @@ export default React.forwardRef(function RadialMaskOverlay(
     duration = 700,
     children,
     onOpened,
+    onRequestClose,
   }: Readonly<{
     open: boolean;
     origin?: Origin;
     duration?: number;
     children?: React.ReactNode;
     onOpened?: () => void;
+    onRequestClose?: () => void;
   }>,
   ref: React.Ref<RadialMaskHandle | null>,
 ) {
@@ -134,7 +136,12 @@ export default React.forwardRef(function RadialMaskOverlay(
     // this component after they receive any callback they need.
     if (!open) {
       // when open becomes false we will grow the hole then let parent hide
-      animateClose().catch(() => {});
+      animateClose()
+        .then(() => {
+          // notify parent that we finished closing
+          onRequestClose?.();
+        })
+        .catch(() => {});
     }
     // cleanup on unmount
     return () => {
@@ -148,13 +155,31 @@ export default React.forwardRef(function RadialMaskOverlay(
   useImperativeHandle(ref, () => ({
     close: async () => {
       await animateClose();
+      // if parent provided a request close handler, notify it after animation
+      onRequestClose?.();
     },
   }));
+
+  // close on Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!open) return;
+      if (e.key === "Escape") {
+        // trigger close animation and notify parent
+        animateClose().then(() => onRequestClose?.()).catch(() => {});
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onRequestClose]);
 
   return (
     <div
       className="fixed inset-0 z-60 flex items-center justify-center"
       style={{ pointerEvents: animating || contentVisible ? "auto" : "none" }}
+      role="dialog"
+      aria-modal={true}
+      tabIndex={-1}
       aria-hidden={!contentVisible}
     >
       <div

@@ -9,6 +9,7 @@ import OutroSequence from "../components/OutroSequence";
 import AcademicProgress from "../components/AcademicProgress";
 import TreeVisualizer from "../components/TreeVisualizer";
 import dialoguesList from "../data/dialogues";
+import treeData from "../data/tree";
 
 type AnimationPhase =
   | "white"
@@ -47,6 +48,19 @@ export default function Home() {
 
   // Tree visualizer overlay state (open + origin coordinates in percentages)
   const [showTree, setShowTree] = useState<{ open: boolean; origin?: { x: string; y: string } }>({ open: false });
+
+  // Dynamic calculation of academic progress percentage
+  const completedNodes = treeData.filter((n) => n.status === "completed").length;
+  const totalNodes = treeData.length;
+  const progressPercentage = (completedNodes / totalNodes) * 100;
+
+  // ✅ NEW: Scroll Helper Function
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   const openTreeFromEvent = (e?: MouseEvent) => {
     // Default to center if coordinates are not available
@@ -590,7 +604,7 @@ export default function Home() {
       <OutroSequence outroPhase={outroPhase} outroFrame={outroFrame} />
 
       {/* Degree path visualizer overlay */}
-      <TreeVisualizer open={showTree.open} origin={showTree.origin} onClose={() => setShowTree({ open: false })} />
+      <TreeVisualizer open={showTree.open} origin={showTree.origin} onClose={() => setShowTree({ open: false })} prefersReducedMotion={prefersReducedMotion} />
 
       {/* Screen reader announcement for outgoing links */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
@@ -619,10 +633,10 @@ export default function Home() {
                   CS Student with an Artist Background
                 </p>
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                  <button className="rounded-lg bg-white px-6 py-3 text-base font-medium text-black transition-colors hover:bg-zinc-200 md:px-8 md:py-4 md:text-lg">
+                  <button onClick={() => scrollToSection("projects")} className="rounded-lg bg-white px-6 py-3 text-base font-medium text-black transition-colors hover:bg-zinc-200 md:px-8 md:py-4 md:text-lg">
                     View Work
                   </button>
-                  <button className="rounded-lg border border-zinc-800 px-6 py-3 text-base font-medium transition-colors hover:border-zinc-700 hover:bg-zinc-900/50 md:px-8 md:py-4 md:text-lg">
+                  <button onClick={() => scrollToSection("contact")} className="rounded-lg border border-zinc-800 px-6 py-3 text-base font-medium transition-colors hover:border-zinc-700 hover:bg-zinc-900/50 md:px-8 md:py-4 md:text-lg">
                     Contact
                   </button>
                 </div>
@@ -704,7 +718,7 @@ export default function Home() {
           </div>
 
           {/* Project Cards */}
-          <div className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8">
+          <div id="projects" className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8">
             <h3 className="mb-3 text-xl font-semibold md:text-2xl">
               Project One
             </h3>
@@ -734,9 +748,9 @@ export default function Home() {
               architecture patterns for optimal performance.
             </p>
           </div>
-
+          
           {/* Academic Progress Bento */}
-          <AcademicProgress progress={90} onOpen={(e) => openTreeFromEvent(e)} />
+          <AcademicProgress progress={progressPercentage} onOpen={(e) => openTreeFromEvent(e)} />
 
           {/* On Repeat / Soundtrack Card */}
           <div
@@ -764,7 +778,7 @@ export default function Home() {
         </div>
 
         {/* Contact Footer */}
-        <footer className="mt-12 border-t border-zinc-800 pt-8 md:mt-20">
+        <footer id="contact" className="mt-12 border-t border-zinc-800 pt-8 md:mt-20">
           <div className="flex flex-col items-center justify-center gap-6 md:flex-row md:justify-between">
             <p className="text-zinc-400">© 2025 Kaung Lin. All rights reserved.</p>
               <div className="flex gap-6">

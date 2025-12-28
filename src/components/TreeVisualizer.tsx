@@ -13,7 +13,8 @@ export default function TreeVisualizer({
   open,
   onClose,
   origin = { x: "50%", y: "50%" },
-}: Readonly<{ open: boolean; onClose: () => void; origin?: { x: string; y: string } }>) {
+  prefersReducedMotion = false,
+}: Readonly<{ open: boolean; onClose: () => void; origin?: { x: string; y: string }; prefersReducedMotion?: boolean; }>) {
   const maskRef = useRef<RadialMaskHandle | null>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const [selectedNode, setSelectedNode] = React.useState<null | TreeNode>(null);
@@ -41,7 +42,7 @@ export default function TreeVisualizer({
   if (!open) return null;
 
   return (
-    <RadialMaskOverlay ref={maskRef} open={open} origin={origin} onOpened={handleOpened} onRequestClose={() => onClose()}>
+    <RadialMaskOverlay ref={maskRef} open={open} origin={origin} onOpened={handleOpened} onRequestClose={() => onClose()} prefersReducedMotion={prefersReducedMotion}>
       <div className="relative z-70 w-full h-full flex items-center justify-center pointer-events-none">
         {/* pointer-events-auto added to children so you can click the tree but clicks outside pass through if needed */}
         <div className="max-w-4xl w-full p-6 md:p-12 text-white pointer-events-auto">

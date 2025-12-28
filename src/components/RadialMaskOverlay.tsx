@@ -17,6 +17,7 @@ export default React.forwardRef(function RadialMaskOverlay(
     children,
     onOpened,
     onRequestClose,
+    prefersReducedMotion = false,
   }: Readonly<{
     open: boolean;
     origin?: Origin;
@@ -24,6 +25,7 @@ export default React.forwardRef(function RadialMaskOverlay(
     children?: React.ReactNode;
     onOpened?: () => void;
     onRequestClose?: () => void;
+    prefersReducedMotion?: boolean;
   }>,
   ref: React.Ref<RadialMaskHandle | null>,
 ) {
@@ -40,6 +42,15 @@ export default React.forwardRef(function RadialMaskOverlay(
     return new Promise((resolve) => {
       setAnimating(true);
       setContentVisible(false);
+
+      if (prefersReducedMotion) {
+        setRadiusPx(0);
+        setAnimating(false);
+        setContentVisible(true);
+        onOpened?.();
+        resolve();
+        return;
+      }
 
       const vmax = Math.max(window.innerWidth, window.innerHeight);
       const startRadius = Math.ceil(vmax * 1.5);
@@ -91,6 +102,14 @@ export default React.forwardRef(function RadialMaskOverlay(
 
       const vmax = Math.max(window.innerWidth, window.innerHeight);
       const endRadius = Math.ceil(vmax * 1.5);
+
+      if (prefersReducedMotion) {
+        setRadiusPx(endRadius);
+        setAnimating(false);
+        resolve();
+        return;
+      }
+      
       let start: number | null = null;
 
       if (rafRef.current) cancelAnimationFrame(rafRef.current);

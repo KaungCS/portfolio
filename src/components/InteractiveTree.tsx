@@ -190,7 +190,7 @@ export default function InteractiveTree({ nodes, width = 800, height = 320, onNo
                     e.stopPropagation(); 
                     handleNodeClick(n);
                 }}
-                className="transition-transform duration-200 cursor-pointer hover:scale-110"
+                className="transition-transform duration-200 cursor-pointer"
               >
                 {/* Focus Ring */}
                 {isFocused && (

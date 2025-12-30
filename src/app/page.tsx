@@ -11,6 +11,7 @@ import TreeVisualizer from "../components/TreeVisualizer";
 import treeData from "../data/tree";
 import ScrambleText from "../components/ScrambleText";
 import Bookshelf from "../components/Bookshelf";
+import StatsCard from "../components/StatsCard";
 
 // ... (Keep existing types AnimationPhase, OutroPhase) ...
 type AnimationPhase = "white" | "frame1" | "frame2" | "frame3" | "frame4" | "frame5" | "slicing" | "complete";
@@ -33,7 +34,7 @@ export default function Home() {
   // Dynamic calculation of academic progress
   const completedNodes = treeData.filter((n) => n.status === "completed").length;
   const totalNodes = treeData.length;
-  const progressPercentage = (completedNodes / totalNodes) * 100;
+  const progressPercentage = Math.floor((completedNodes / totalNodes) * 100);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -328,7 +329,7 @@ export default function Home() {
           <Bookshelf />
           </div>
 
-          <AcademicProgress progress={progressPercentage} onOpen={(e) => openTreeFromEvent(e)} />
+          <StatsCard degreeProgress={progressPercentage} onOpenDegree={(e) => openTreeFromEvent(e)} />
 
           <div className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 overflow-hidden md:col-span-1 flex flex-col md:p-8" style={{ height: "530px" }}>
             <div>

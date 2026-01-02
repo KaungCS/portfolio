@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Linkedin, Mail, Code2, Database, Globe } from "lucide-react";
+import { Github, Linkedin, Mail, Code2, Database, Globe, Map } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import Image from "next/image";
@@ -310,9 +310,60 @@ export default function Home() {
             </div>
           </div>
 
-          <div id="projects" className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8">
-            <h3 className="mb-3 text-xl font-semibold md:text-2xl">Project One</h3>
-            <p className="text-zinc-400 md:text-lg">Placeholder Description</p>
+          {/* 1. SEATTLE MAP (Featured Project) */}
+          <div 
+            id="projects"
+            className="group relative col-span-1 md:col-span-2 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-600 hover:shadow-[0_0_30px_rgba(16,185,129,0.05)] overflow-hidden flex flex-col justify-between"
+          >
+            {/* Hover Effect: Subtle Flashlight Glow (Kept for visuals) */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-900/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-4">
+                {/* CUSTOM FAVICON CONTAINER */}
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-black shadow-inner overflow-hidden">
+                  <Image 
+                    src="/map-icon.png" 
+                    alt="Map Icon" 
+                    width={100} 
+                    height={100} 
+                    className="object-contain md:opacity-10 group-hover:opacity-100 transition-opacity duration-300"
+                  />
+                </div>
+
+                <h3 className="text-xl font-semibold md:text-2xl text-zinc-100 group-hover:text-white transition-colors">
+                  Seattle | Interactive Map
+                </h3>
+              </div>
+              
+              <p className="text-zinc-400 md:text-lg leading-relaxed mb-6">
+                A spatial exploration of personal landmarks using a custom flashlight rendering engine. 
+                Built with React, Framer Motion, and physics-based interactions to simulate tactile navigation in the dark.
+              </p>
+            </div>
+
+            {/* BOTTOM ROW: Tags + Button */}
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 mt-auto">
+              
+              {/* Tech Tags */}
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs font-mono bg-zinc-800/80 border border-zinc-700/50 px-2 py-1 rounded text-zinc-300">TypeScript</span>
+                <span className="text-xs font-mono bg-zinc-800/80 border border-zinc-700/50 px-2 py-1 rounded text-zinc-300">Framer Motion</span>
+                <span className="text-xs font-mono bg-zinc-800/80 border border-zinc-700/50 px-2 py-1 rounded text-zinc-300">Interactive UI</span>
+              </div>
+
+              {/* NEW: Dedicated Action Button */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevents bubbling if you ever add click logic to the parent later
+                  startOutro("https://kaungs-seattle-map.vercel.app/", "UW Map");
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-900 rounded-lg font-medium text-sm transition-transform hover:bg-white hover:scale-105 active:scale-95 shadow-lg shadow-emerald-900/10 group/btn"
+              >
+                View Project
+                <Globe className="h-4 w-4 transition-transform group-hover/btn:rotate-12" />
+              </button>
+            </div>
           </div>
 
           <div className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8">

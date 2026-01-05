@@ -16,7 +16,7 @@ export const bookData: Book[] = [
     author: "Oliver Burkeman",
     cover: "https://m.media-amazon.com/images/I/71oW2lehwsL._SY466_.jpg", // Example URL
     status: "reading",
-    review: "We have limited time; focus on what matters."
+    review: "Learn to enjoy the present as much as preparing for the future."
   },
   {
     id: "2",
@@ -33,7 +33,7 @@ export const bookData: Book[] = [
     cover: "https://m.media-amazon.com/images/I/51UmNg33hCL._SY445_SX342_FMwebp_.jpg",
     status: "finished",
     rating: 4,
-    review: "Empowering mindset shifts for personal growth."
+    review: "Others' actions are often not in your control, so don't let them control your peace."
   }
 ];
 

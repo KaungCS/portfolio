@@ -4,10 +4,10 @@ import React from "react";
 
 type StatItem = {
   label: string;
-  value: number;    // Current value (e.g., 64)
-  max: number;      // Max value (e.g., 100)
-  unit?: string;    // e.g., "%", "lbs", "problems"
-  color?: string;   // Tailwind color class for the bar
+  value: number;
+  max: number;
+  unit?: string;
+  color?: string;
 };
 
 export default function StatsCard({
@@ -17,7 +17,6 @@ export default function StatsCard({
   degreeProgress?: number;
   onOpenDegree?: (e?: React.MouseEvent) => void;
 }) {
-  // Define your stats here
   const stats: StatItem[] = [
     { 
       label: "Degree Progress", 
@@ -28,7 +27,7 @@ export default function StatsCard({
     },
     { 
       label: "Blind 75 Progress", 
-      value: 16, // Rough estimate
+      value: 16, 
       max: 75, 
       unit: "problems", 
       color: "bg-purple-500" 
@@ -36,23 +35,16 @@ export default function StatsCard({
   ];
 
   return (
-    <div className="col-span-1 flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.03)] md:p-8">
+    // 'h-full' ensures the card stretches to fill the grid cell, so 'mt-auto' works
+    <div className="col-span-1 h-full flex flex-col gap-4 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.03)] md:p-8">
       
+      {/* HEADER: Just the Title now */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xl font-semibold md:text-2xl">My Stats</h3>
-            {/* The Degree Button is now iconic/compact in the header */}
-            <button
-                type="button"
-                onClick={(e) => onOpenDegree?.(e)}
-                className="text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-md transition-colors border border-zinc-700"
-            >
-                View Degree Map
-            </button>
-        </div>
-        <p className="text-zinc-400 text-sm mb-6">Tracking growth in all areas.</p>
+        <h3 className="text-xl font-semibold md:text-2xl mb-2">My Stats</h3>
+        <p className="text-zinc-400 text-sm">Tracking growth in all areas.</p>
       </div>
 
+      {/* STATS: Middle Section */}
       <div className="space-y-6">
         {stats.map((stat, i) => {
           const pct = Math.min(100, Math.round((stat.value / stat.max) * 100));
@@ -75,6 +67,18 @@ export default function StatsCard({
             </div>
           );
         })}
+      </div>
+
+      {/* FOOTER: Button moved here with 'mt-auto' */}
+      <div className="mt-auto pt-4 flex justify-center">
+        <button
+          type="button"
+          onClick={(e) => onOpenDegree?.(e)}
+          // Increased padding (px-6 py-2.5) and font size (text-sm)
+          className="w-full sm:w-auto text-sm font-medium bg-white hover:bg-zinc-200 text-zinc-950 px-6 py-2.5 rounded-lg transition-transform active:scale-95 shadow-lg shadow-zinc-900/20"
+        >
+          View Degree Map
+        </button>
       </div>
     </div>
   );

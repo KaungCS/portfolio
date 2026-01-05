@@ -253,10 +253,10 @@ export default function Home() {
                 <h1 className="text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">Hello, I'm Kaung</h1>
                 <p className="mt-4 text-xl text-zinc-400 md:text-2xl">CS Student with an Artist Background</p>
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                  <button onClick={() => scrollToSection("projects")} className="rounded-lg bg-white px-6 py-3 text-base font-medium text-black transition-colors hover:bg-zinc-200 md:px-8 md:py-4 md:text-lg">
+                  <button onClick={() => scrollToSection("projects")} className="cursor-pointer rounded-lg bg-white px-6 py-3 text-base font-medium text-black transition-colors hover:bg-zinc-200 md:px-8 md:py-4 md:text-lg">
                     View Work
                   </button>
-                  <button onClick={() => scrollToSection("contact")} className="rounded-lg border border-zinc-800 px-6 py-3 text-base font-medium transition-colors hover:border-zinc-700 hover:bg-zinc-900/50 md:px-8 md:py-4 md:text-lg">
+                  <button onClick={() => scrollToSection("contact")} className="cursor-pointer rounded-lg border border-zinc-800 px-6 py-3 text-base font-medium transition-colors hover:border-zinc-700 hover:bg-zinc-900/50 md:px-8 md:py-4 md:text-lg">
                     Contact
                   </button>
                 </div>
@@ -327,12 +327,12 @@ export default function Home() {
                     alt="Map Icon" 
                     width={100} 
                     height={100} 
-                    className="object-contain md:opacity-10 group-hover:opacity-100 transition-opacity duration-300"
+                    className={`object-contain ${(prefersReducedMotion?'md:opacity-100':'md:opacity-10')} group-hover:opacity-100 transition-opacity duration-300`}
                   />
                 </div>
 
                 <h3 className="text-xl font-semibold md:text-2xl text-zinc-100 group-hover:text-white transition-colors">
-                  Seattle | Interactive Map
+                  Kaung's UW | An Interactive Map [WIP]
                 </h3>
               </div>
               

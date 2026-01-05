@@ -138,7 +138,7 @@ function BookCard({ book }: { book: Book }) {
     <div className="group relative bg-zinc-900/40 border border-zinc-800 rounded-xl p-4 transition-all hover:bg-zinc-900/80 hover:border-zinc-700 flex flex-col h-full">
       <div className="flex gap-4">
         {/* Cover */}
-        <div className="relative w-20 h-28 flex-shrink-0 shadow-lg rounded-md overflow-hidden bg-zinc-800">
+        <div className="relative w-20 h-30 flex-shrink-0 shadow-lg rounded-md overflow-hidden bg-zinc-800">
           <Image 
             src={book.cover} 
             alt={book.title} 

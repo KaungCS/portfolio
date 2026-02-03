@@ -376,7 +376,7 @@ export default function Home() {
                 src="/tree-bg.png" 
                 alt="Tree Background"
                 fill
-                className={`object-contain p-4 ${(prefersReducedMotion?'opacity-0':'opacity-20')}`}
+                className={`object-contain p-4 ${(prefersReducedMotion?'opacity-0':'opacity-35')}`}
                 priority
               />
             </div>

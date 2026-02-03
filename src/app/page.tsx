@@ -397,7 +397,7 @@ export default function Home() {
                   The Decision Tree
                 </h3>
               </div>
-              <p className="text-zinc-400 md:text-lg mb-6">An interactive personality quiz with a unique tree result.</p>
+              <p className="text-zinc-400 md:text-lg mb-6">An interactive personality quiz with a unique tree result. App only works on PC currently.</p>
             </div>
 
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 mt-4">
@@ -410,7 +410,7 @@ export default function Home() {
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
-                  startOutro("https://the-decision-tree.vercel.app/", "The Decision Tree");
+                  startOutro("https://devpost.com/software/the-decision-tree/", "The Decision Tree");
                 }}
                 className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-900 rounded-lg font-medium text-sm transition-transform hover:bg-white hover:scale-105 active:scale-95 shadow-lg shadow-emerald-900/10 group/btn whitespace-nowrap w-full sm:w-auto"
               >

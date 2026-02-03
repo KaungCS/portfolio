@@ -206,7 +206,7 @@ export default function Home() {
           <div aria-hidden className={`w-12 h-6 flex items-center p-1 rounded-full transition-colors ${prefersReducedMotion ? "bg-emerald-500" : "bg-zinc-700"}`}>
             <div className={`bg-white w-4 h-4 rounded-full shadow transform transition-transform ${prefersReducedMotion ? "translate-x-6" : "translate-x-0"}`} />
           </div>
-          <span className="hidden md:inline text-zinc-300 text-sm pr-2">Reduced Motion</span>
+          <span className="inline text-zinc-300 text-sm pr-2">Reduced Motion</span>
         </button>
       </div>
 
@@ -366,9 +366,58 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8">
-            <h3 className="mb-3 text-xl font-semibold md:text-2xl">Project Two</h3>
-            <p className="text-zinc-400 md:text-lg">Placeholder Description</p>
+          <div className="group relative col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] flex flex-col justify-between overflow-hidden">
+            {/* HOVER BACKGROUND */}
+            <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+              {/* 1. 'object-contain' ensures the tree fits in the card without zooming in too much. 
+                2. 'p-4' adds a little padding so the tree doesn't touch the very edges.
+              */}
+              <Image 
+                src="/tree-bg.png" 
+                alt="Tree Background"
+                fill
+                className={`object-contain p-4 ${(prefersReducedMotion?'opacity-0':'opacity-20')}`}
+                priority
+              />
+            </div>
+
+            {/* Card Content - Z-index 10 is crucial so text sits ON TOP of the image */}
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-black shadow-inner overflow-hidden">
+                  <Image 
+                    src="/tree-icon.png" 
+                    alt="Decision Tree Icon" 
+                    width={100} 
+                    height={100} 
+                    className="object-contain"
+                  />
+                </div>
+                <h3 className="text-xl font-semibold md:text-2xl text-zinc-100 group-hover:text-white transition-colors">
+                  The Decision Tree
+                </h3>
+              </div>
+              <p className="text-zinc-400 md:text-lg mb-6">An interactive personality quiz with a unique tree result.</p>
+            </div>
+
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 mt-4">
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs font-mono bg-zinc-800/80 border border-zinc-700/50 px-2 py-1 rounded text-zinc-300 whitespace-nowrap">JavaScript</span>
+                <span className="text-xs font-mono bg-zinc-800/80 border border-zinc-700/50 px-2 py-1 rounded text-zinc-300 whitespace-nowrap">Phaser</span>
+                <span className="text-xs font-mono bg-zinc-800/80 border border-zinc-700/50 px-2 py-1 rounded text-zinc-300 whitespace-nowrap">Interactive UI</span>
+              </div>
+
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  startOutro("https://the-decision-tree.vercel.app/", "The Decision Tree");
+                }}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-900 rounded-lg font-medium text-sm transition-transform hover:bg-white hover:scale-105 active:scale-95 shadow-lg shadow-emerald-900/10 group/btn whitespace-nowrap w-full sm:w-auto"
+              >
+                View Project
+                <Globe className="h-4 w-4 transition-transform group-hover/btn:rotate-12" />
+              </button>
+            </div>
           </div>
 
           <div className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8">

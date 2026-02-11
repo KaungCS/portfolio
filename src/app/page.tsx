@@ -421,12 +421,18 @@ export default function Home() {
           </div>
 
           {/* 3. iShowAccessibility (DubsTech) */}
-          <div className="group relative col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8 flex flex-col justify-between">
+          <div className="group relative col-span-1 md:col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8 flex flex-col justify-between">
             <div className="relative z-10">
               <div className="flex items-center gap-4 mb-4">
                 {/* Icon Container */}
                 <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-black shadow-inner overflow-hidden">
-                  <Globe className="h-8 w-8 text-zinc-300" />
+                  <Image 
+                    src="/ishowicon.png" 
+                    alt="Decision Tree Icon" 
+                    width={100} 
+                    height={100} 
+                    className="object-contain"
+                  />
                 </div>
                 <h3 className="text-xl font-semibold md:text-2xl text-zinc-100 group-hover:text-white transition-colors">
                   iShowAccessibility
@@ -459,6 +465,8 @@ export default function Home() {
             </div>
           </div>
 
+          <div className="hidden md:block md:col-span-2 pointer-events-none" aria-hidden="true" />
+
           <StatsCard degreeProgress={progressPercentage} onOpenDegree={(e) => openTreeFromEvent(e)} />
 
           <div className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 overflow-hidden md:col-span-1 flex flex-col md:p-8" style={{ height: "530px" }}>
@@ -478,7 +486,11 @@ export default function Home() {
             </div>
           </div>
         </div>
+        
+        {/* Invisible line break */}
+        <div className="hidden md:block md:col-span-2 pointer-events-none" aria-hidden="true" />
 
+        {/* Bookshelf - Full width card below the grid on desktop, and normal flow on mobile */}
         <div className="col-span-1 md:col-span-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8 mt-8">
           <Bookshelf />
         </div>

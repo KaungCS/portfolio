@@ -420,13 +420,43 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8">
-            <h3 className="mb-3 text-xl font-semibold md:text-2xl">Project Three</h3>
-            <p className="text-zinc-400 md:text-lg">Placeholder Description</p>
-          </div>
+          {/* 3. iShowAccessibility (DubsTech) */}
+          <div className="group relative col-span-1 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8 flex flex-col justify-between">
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-4">
+                {/* Icon Container */}
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-black shadow-inner overflow-hidden">
+                  <Globe className="h-8 w-8 text-zinc-300" />
+                </div>
+                <h3 className="text-xl font-semibold md:text-2xl text-zinc-100 group-hover:text-white transition-colors">
+                  iShowAccessibility
+                </h3>
+              </div>
+              <p className="text-zinc-400 md:text-lg mb-6">
+                Built for DubsTech Datathon '26. A web application designed to evaluate and visualize accessibility metrics for inclusive design.
+              </p>
+            </div>
 
-          <div className="col-span-1 md:col-span-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8">
-          <Bookshelf />
+            {/* Bottom Row: Tags + Single Button */}
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 mt-auto">
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs font-mono bg-zinc-800/80 border border-zinc-700/50 px-2 py-1 rounded text-zinc-300">Hackathon</span>
+                <span className="text-xs font-mono bg-zinc-800/80 border border-zinc-700/50 px-2 py-1 rounded text-zinc-300">Python</span>
+                <span className="text-xs font-mono bg-zinc-800/80 border border-zinc-700/50 px-2 py-1 rounded text-zinc-300">Web</span>
+              </div>
+
+              {/* Single Button linking to GitHub */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  startOutro("https://github.com/KaungCS/DubsTech-Datathon-26", "GitHub Repo");
+                }}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-900 rounded-lg font-medium text-sm transition-transform hover:bg-white hover:scale-105 active:scale-95 shadow-lg shadow-emerald-900/10 group/btn whitespace-nowrap w-full sm:w-auto"
+              >
+                View Project
+                <Globe className="h-4 w-4 transition-transform group-hover/btn:rotate-12" />
+              </button>
+            </div>
           </div>
 
           <StatsCard degreeProgress={progressPercentage} onOpenDegree={(e) => openTreeFromEvent(e)} />
@@ -447,6 +477,10 @@ export default function Home() {
                       title="On Repeat - Soundtrack" />
             </div>
           </div>
+        </div>
+
+        <div className="col-span-1 md:col-span-3 rounded-lg border border-zinc-800 bg-zinc-900/50 p-6 transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] md:p-8 mt-8">
+          <Bookshelf />
         </div>
 
         <footer id="contact" className="mt-12 border-t border-zinc-800 pt-8 md:mt-20">
